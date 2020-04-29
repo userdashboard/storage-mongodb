@@ -43,7 +43,7 @@ async function add (path, itemid) {
     return
   }
   const collection = await getCollection(path)
-  return collection.insertOne({ path, itemid, created: new Date() }, { writeConcern: 1 })
+  return collection.insertOne({ path, itemid, created: new Date().getTime() }, { writeConcern: 1 })
 }
 
 async function count (path) {
@@ -99,14 +99,12 @@ async function getCollection (file) {
   if (indexedCollections[name]) {
     return indexedCollections[name]
   }
-  const collections = await db.collections()
-  let collection
-  if (!collections.length || collections.indexOf(name) === 1) {
-    await db.createCollection(name)
-    collection = await db.collection(name)
-    await collection.createIndex({ path: 1 })
-    await collection.createIndex({ created: '-1' })
+  const collection = indexedCollections[name] = await db.createCollection(name)
+  const indexes = await collection.indexes()
+  if (indexes && indexes.length) {
+    return collection
   }
-  collection = indexedCollections[name] = collection || await db.collection(name)
+  await collection.createIndex({ path: 1 }, { collation: { backwards: true, locale: 'en' } })
+  await collection.createIndex({ created: -1 }, { collation: { backwards: true, locale: 'en' } })
   return collection
 }

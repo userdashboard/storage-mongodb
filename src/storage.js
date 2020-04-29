@@ -73,7 +73,7 @@ async function writeImage (file, buffer) {
     throw new Error('invalid-buffer')
   }
   const collection = await getCollection()
-  return collection.insertOne({ file, buffer, created: new Date() }, { writeConcern: 1 })
+  return collection.insertOne({ file, buffer, created: new Date().getTime() }, { writeConcern: 1 })
 }
 
 async function read (file) {
@@ -128,11 +128,11 @@ async function getCollection () {
   if (objectsCollection) {
     return objectsCollection
   }
-  const collections = await db.collections()
-  if (!collections.length || collections.indexOf('objects') === -1) {
-    await db.createCollection('objects')
-    objectsCollection = await db.collection('objects')
-    await objectsCollection.createIndex({ file: 1 }, { unique: true })
+  objectsCollection = await db.collection('objects')
+  const indexes = await objectsCollection.indexes()
+  if (indexes && indexes.length) {
+    return objectsCollection
   }
+  await objectsCollection.createIndex({ file: 1 }, { unique: true })
   return objectsCollection
 }
