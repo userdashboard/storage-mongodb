@@ -128,7 +128,7 @@ async function getCollection () {
   if (objectsCollection) {
     return objectsCollection
   }
-  objectsCollection = await db.collection('objects')
+  objectsCollection = await db.createCollection('objects')
   const indexes = await objectsCollection.indexes()
   if (indexes && indexes.length) {
     return objectsCollection
