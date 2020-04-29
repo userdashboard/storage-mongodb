@@ -18,6 +18,10 @@ jobs:
       run: sudo apt-get install -y mongodb
     - name: Test without encryption
       run: bash test.sh
+      env:
+        DEBUG_ERRORS: "true"
+        DEBUG_REQUESTS: "true"
+        DEBUG_PUPPETEER: "true"
     - name: Test with encryption
       run: bash test.sh
       env:

@@ -53,11 +53,8 @@ async function count (path) {
 
 async function listAll (path) {
   const collection = await getCollection(path)
-  const cursor1 = await collection.find({ path }).sort({ created: -1 })
-  const cursor2 = await collection.find({ path }).sort({ created: 1 })
-  const items = await cursor1.toArray()
-  console.log('cursor1', items)
-  console.log('cursor2', await cursor2.toArray())
+  const cursor = await collection.find({ path }).sort({ created: -1 })
+  const items = await cursor.toArray()
   if (!items || !items.length) {
     return null
   }
@@ -65,7 +62,6 @@ async function listAll (path) {
   for (const item of items) {
     results.push(item.itemid)
   }
-  console.log('results', results)
   return results
 }
 
