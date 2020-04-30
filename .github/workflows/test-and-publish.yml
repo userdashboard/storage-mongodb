@@ -18,11 +18,11 @@ jobs:
       run: sudo apt-get install -y mongodb
     - name: Setup dependencies
       run: |
-        git clone https://github.com/userdashboard/dashboard.git instance
-        cd instance
+        git clone https://github.com/userdashboard/dashboard.git /tmp/instance
+        cd /tmp/instance
         npm install mongodb mocha puppeteer@2.1.1 --no-save
     - name: Test without encryption
-      run: cd instance && npm test
+      run: cd /tmp/instance && npm test
       env:
         NODE_ENV: "testing"
         FAST_START: "true"
@@ -34,7 +34,7 @@ jobs:
         GENERATE_SITEMAP_TXT: "false"
         GENERATE_API_TXT: "false"
     - name: Test with encryption
-      run: cd instance && npm test
+      run: cd /tmp/instance && npm test
       env:
         NODE_ENV: "testing"
         FAST_START: "true"
