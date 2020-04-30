@@ -1,4 +1,5 @@
 # MongoDB Storage for Dashboard
+![Test suite status](https://github.com/userdashboard/storage-mongodb/workflows/test-and-publish/badge.svg?branch=master)
 
 Install this module to use [MongoDB](https://www.mongodb.com/) for data storage.
 
