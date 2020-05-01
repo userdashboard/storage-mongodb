@@ -10,13 +10,12 @@ jobs:
         node-version: [12.x]
     steps:
     - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - name: Setup MongoDB
       run: sudo apt-get install -y mongodb
-    - name: Setup dependencies
+    - name: Install dependencies
       run: |
         git clone https://github.com/userdashboard/dashboard.git /tmp/instance
         cd /tmp/instance
@@ -26,7 +25,7 @@ jobs:
         mkdir -p /tmp/instance/node_modules/@userdashboard/storage-mongodb
         cp index.js /tmp/instance/node_modules/@userdashboard/storage-mongodb
         cp -R src /tmp/instance/node_modules/@userdashboard/storage-mongodb
-    - name: Test without encryption
+    - name: Test unencrypted MongoDB storage
       run: cd /tmp/instance && npm test
       env:
         NODE_ENV: "testing"
@@ -38,7 +37,7 @@ jobs:
         MONGODB_DATABASE: "dashboard"
         GENERATE_SITEMAP_TXT: "false"
         GENERATE_API_TXT: "false"
-    - name: Test with encryption
+    - name: Test encrypted MongoDB storage
       run: cd /tmp/instance && npm test
       env:
         NODE_ENV: "testing"
