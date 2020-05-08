@@ -5,9 +5,14 @@ Install this module to use [MongoDB](https://www.mongodb.com/) for data storage.
 
 You will need to launch with additional configuration variables:
 
-    STORAGE_ENGINE=@userdashboard/storage-mongodb
+    STORAGE=@userdashboard/storage-mongodb
     MONGODB_URL= mongo://localhost:27017
     MONGODB_DATABASE="my_database"
+
+You can use this storage for a module:
+
+    MODULE_NAME_STORAGE=@userdashboard/storage-mongodb
+    MODULE_NAME_MONGODB_URL=mongo://localhost:27017
 
 To test this module use [Dashboard](https://github.com/userdashboard/dashboard)'s test suite configured with this storage engine.
 
