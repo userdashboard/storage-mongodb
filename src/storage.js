@@ -13,7 +13,8 @@ module.exports = {
         throw new Error('unknown-error')
       }
       const client = module.exports.client = mongoClient
-      db = client.db(process.env.MONGODB_DATABASE || 'dashboard')
+      const database = process.env[`${moduleName}_MONGODB_DATABASE`] || process.env.MONGODB_DATABASE || 'dashboard'
+      db = client.db(database)
     })
     async function getCollection () {
       if (objectsCollection) {
