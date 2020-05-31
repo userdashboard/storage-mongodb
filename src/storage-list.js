@@ -1,4 +1,3 @@
-const Log = require('@userdashboard/dashboard/src/log.js')('storage-mongodb')
 const MongoDB = require('mongodb')
 
 module.exports = {
@@ -8,8 +7,7 @@ module.exports = {
     let db
     MongoDB.MongoClient.connect(mongodbURL, (error, mongoClient) => {
       if (error) {
-        Log.error('mongodb storage error', error)
-        throw new Error('unknown-error')
+        throw error
       }
       const client = module.exports.client = mongoClient
       db = client.db(process.env.MONGODB_DATABASE || 'dashboard')
