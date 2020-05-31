@@ -1,4 +1,4 @@
-const Log = require('@userdashboard/src/log.js')('storage-mongodb')
+const Log = require('@userdashboard/dashboard/src/log.js')('storage-mongodb')
 const MongoDB = require('mongodb')
 
 module.exports = {
