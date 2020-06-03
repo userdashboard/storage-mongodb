@@ -114,12 +114,20 @@ module.exports = {
       }
     }
     if (process.env.NODE_ENV === 'testing') {
-      container.flush = async () => {
-        const collections = await db.collections()
-        for (const collection of collections) {
-          await collection.deleteMany({})
+      const util = require('util')
+      container.flush = util.promisify((callback) => {
+        async function doFlush () {
+          const collections = await db.collections()
+          for (const collection of collections) {
+            await collection.deleteMany({})
+          }
+          return callback()
         }
-      }
+        if (!db) {
+          return setTimeout(doFlush, 1)
+        }
+        return doFlush()
+      })
     }
     return container
   }
