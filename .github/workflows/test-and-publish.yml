@@ -15,13 +15,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Setup MongoDB
       run: sudo apt-get install -y mongodb
-    - name: Increase NPM version
-      run: npm version patch
     - name: Install dependencies
       run: |
         git clone https://github.com/userdashboard/dashboard.git /tmp/instance
         cd /tmp/instance
         npm install mongodb mocha faker puppeteer@2.1.1 --no-save
+        git config --global user.name "${{ secrets.NAME }}"
+        git config --global user.email "${{ secrets.EMAIL }}"
     - name: Fake-install module
       run: |
         mkdir -p /tmp/instance/node_modules/@userdashboard/storage-mongodb
@@ -53,6 +53,8 @@ jobs:
         GENERATE_API_TXT: "false"
         ENCRYPTION_SECRET: "12345678901234567890123456789012"
         ENCRYPTION_SECRET_IV: "1234123412341234"
+    - name: Increase NPM version
+      run: npm version patch
     - name: Publish to NPM
       uses: JS-DevTools/npm-publish@v1
       with:
