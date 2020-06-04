@@ -117,6 +117,9 @@ module.exports = {
       const util = require('util')
       container.flush = util.promisify((callback) => {
         async function doFlush () {
+          if (!db) {
+            return setTimeout(doFlush, 1)
+          }
           const collections = await db.collections()
           for (const collection of collections) {
             await collection.deleteMany({})
