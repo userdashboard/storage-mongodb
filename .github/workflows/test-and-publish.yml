@@ -56,6 +56,13 @@ jobs:
         GENERATE_API_TXT: "false"
         ENCRYPTION_SECRET: "12345678901234567890123456789012"
         ENCRYPTION_SECRET_IV: "1234123412341234"
+    - name: Publish to Github
+      uses: stefanzweifel/git-auto-commit-action@v4.1.6
+      with:
+        commit_message: Automatically regenerated against current version
+        branch: ${{ github.head_ref }}
+        commit_options: '--no-verify --signoff'
+        repository: .
     - name: Publish to NPM
       uses: JS-DevTools/npm-publish@v1
       with:
