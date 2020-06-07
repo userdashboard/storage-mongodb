@@ -32,7 +32,7 @@ module.exports = {
           if (!file) {
             return callback(new Error('invalid-file'))
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
@@ -55,7 +55,7 @@ module.exports = {
           if (!file) {
             return callback(new Error('invalid-file'))
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
@@ -76,7 +76,7 @@ module.exports = {
           for (const i in files) {
             appended[i] = `${prefix}/${files[i]}`
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
@@ -116,7 +116,7 @@ module.exports = {
           if (!file) {
             return callback(new Error('invalid-file'))
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
@@ -136,7 +136,7 @@ module.exports = {
           if (!contents && contents !== '') {
             return callback(new Error('invalid-contents'))
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
@@ -178,7 +178,7 @@ module.exports = {
           if (!buffer || !buffer.length) {
             return callback(new Error('invalid-buffer'))
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
@@ -195,7 +195,7 @@ module.exports = {
           if (!file) {
             return callback(new Error('invalid-file'))
           }
-          return getCollection('objects', (error, collection) => {
+          return getCollection((error, collection) => {
             if (error) {
               return callback(error)
             }
