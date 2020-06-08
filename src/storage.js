@@ -152,7 +152,7 @@ module.exports = {
                 }
                 const existing = result.length === 1
                 if (existing) {
-                  return collection.updateOne({ file }, { $set: { contents }, writeConcern: 1 }, (error) => {
+                  return collection.updateOne({ file }, { $set: { contents } }, (error) => {
                     if (error) {
                       Log.error('error writing', error)
                       return callback(new Error('unknown-error'))
