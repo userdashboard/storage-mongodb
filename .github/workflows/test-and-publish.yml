@@ -19,9 +19,6 @@ jobs:
       run: |
         git config --global user.name "${{ secrets.NAME }}"
         git config --global user.email "${{ secrets.EMAIL }}"
-        echo increasing npm version
-        echo `ls`
-        echo `cat package.json`
         npm version patch
         npm install faker puppeteer@2.1.1 @userdashboard/dashboard --no-save
         npm install -g mocha
