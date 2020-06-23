@@ -49,18 +49,18 @@ jobs:
         GENERATE_API_TXT: "false"
         ENCRYPTION_SECRET: "12345678901234567890123456789012"
         ENCRYPTION_SECRET_IV: "1234123412341234"
-    - name: Increase NPM version
+    - name: Publish new version to Github
       run: |
+        pwd
+        ls
         git config --global user.name "${{ secrets.NAME }}"
         git config --global user.email "${{ secrets.EMAIL }}"
+        git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
         npm version patch
+        git add package.json
+        git commit -m "Automatically regenerated against current version"
+        git push github HEAD:${GITHUB_REF}
     - name: Publish to NPM
       uses: JS-DevTools/npm-publish@v1
       with:
         token: ${{ secrets.NPM_TOKEN }}
-    - name: Publish changes to Github
-      run: |
-        git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
-        git add package.json
-        git commit -m "Automatically regenerated against current version"
-        git push github HEAD:${GITHUB_REF}
