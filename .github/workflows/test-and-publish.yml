@@ -29,7 +29,7 @@ jobs:
     - name: Increase NPM version
       run: npm version patch
     - name: Test
-      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" > tests.txt
       env:
         NODE_ENV: testing
         FAST_START: true
