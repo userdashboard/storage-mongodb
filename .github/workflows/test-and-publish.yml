@@ -24,7 +24,7 @@ jobs:
         cp *.js node_modules/@userdashboard/storage-mongodb
         cp -R src/ node_modules/@userdashboard/storage-mongodb/src/
     - name: Test unencrypted MongoDB storage
-      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js1"
       env:
         NODE_ENV: "testing"
         FAST_START: "true"
@@ -36,7 +36,7 @@ jobs:
         GENERATE_SITEMAP_TXT: "false"
         GENERATE_API_TXT: "false"
     - name: Test encrypted MongoDB storage
-      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js1"
       env:
         NODE_ENV: "testing"
         FAST_START: "true"
@@ -61,7 +61,6 @@ jobs:
     - name: Publish changes to Github
       run: |
         git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
-        git pull github ${GITHUB_REF} --ff-only
         git add package.json
         git commit -m "Automatically regenerated against current version"
         git push github HEAD:${GITHUB_REF}
