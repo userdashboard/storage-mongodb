@@ -63,7 +63,7 @@ jobs:
         echo `cat package.json`
         git add package.json
         git commit -m "Automatically regenerated against current version"
-        git push github ${GITHUB_REF}
+        git push github ${GITHUB_REF} --no-verify --signoff
     - name: Publish to NPM
       uses: JS-DevTools/npm-publish@v1
       with:
