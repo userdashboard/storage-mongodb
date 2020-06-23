@@ -9,7 +9,7 @@ jobs:
       matrix:
         node-version: [12.x]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
@@ -20,6 +20,38 @@ jobs:
         git config --global user.name "${{ secrets.NAME }}"
         git config --global user.email "${{ secrets.EMAIL }}"
         npm version patch
+        # npm install faker puppeteer@2.1.1 @userdashboard/dashboard --no-save
+        # npm install -g mocha
+        # mkdir -p node_modules/@userdashboard/storage-mongodb
+        # rm -rf node_modules/@userdashboard/storage-mongodb/src
+        # cp *.js node_modules/@userdashboard/storage-mongodb
+        # cp -R src/ node_modules/@userdashboard/storage-mongodb/src/
+    - name: Test unencrypted MongoDB storage
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js1"
+      env:
+        NODE_ENV: "testing"
+        FAST_START: "true"
+        DASHBOARD_SERVER: "http://localhost:9000"
+        DOMAIN: "localhost"
+        STORAGE: "@userdashboard/storage-mongodb"
+        MONGODB_URL: "mongodb://localhost:27017"
+        MONGODB_DATABASE: "dashboard"
+        GENERATE_SITEMAP_TXT: "false"
+        GENERATE_API_TXT: "false"
+    - name: Test encrypted MongoDB storage
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js1"
+      env:
+        NODE_ENV: "testing"
+        FAST_START: "true"
+        DASHBOARD_SERVER: "http://localhost:9000"
+        DOMAIN: "localhost"
+        STORAGE: "@userdashboard/storage-mongodb"
+        MONGODB_URL: "mongodb://localhost:27017"
+        MONGODB_DATABASE: "dashboard"
+        GENERATE_SITEMAP_TXT: "false"
+        GENERATE_API_TXT: "false"
+        ENCRYPTION_SECRET: "12345678901234567890123456789012"
+        ENCRYPTION_SECRET_IV: "1234123412341234"
     - name: Publish to Github
       uses: stefanzweifel/git-auto-commit-action@v4.1.6
       with:
