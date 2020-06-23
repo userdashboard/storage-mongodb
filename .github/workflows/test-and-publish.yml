@@ -56,7 +56,7 @@ jobs:
         git clone "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" /tmp/publish
         cd /tmp/publish
         npm version patch
-        git add package.json
+        git add .
         git commit -m "Automatically regenerated against current version"
         git push github master --no-verify --signoff
     - name: Publish to NPM
