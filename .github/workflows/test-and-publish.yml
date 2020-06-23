@@ -17,22 +17,14 @@ jobs:
       run: sudo apt-get install -y mongodb
     - name: Set up as module
       run: |
-        HERE=`pwd`
-        mkdir /tmp/project
-        cd /tmp/project
-        npm init -y
-        npm install faker puppeteer@2.1.1 @userdashboard/dashboard @userdashboard/storage-mongodb
+        npm install faker puppeteer@2.1.1 @userdashboard/dashboard @userdashboard/storage-mongodb --no-save
         npm install -g mocha
         rm node_modules/@userdashboard/storage-mongodb/*.js
         rm -rf node_modules/@userdashboard/storage-mongodb/src
-        cp $HERE/*.js node_modules/@userdashboard/storage-mongodb
-        cp -R $HERE/src/ node_modules/@userdashboard/storage-mongodb/src/
-        echo "global.applicationPath = __dirname" > main.js
+        cp *.js node_modules/@userdashboard/storage-mongodb
+        cp -R src/ node_modules/@userdashboard/storage-mongodb/src/
     - name: Test unencrypted MongoDB storage
-      run: |
-        cd /tmp/project 
-        mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
-        cd $HERE
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
       env:
         NODE_ENV: "testing"
         FAST_START: "true"
@@ -44,10 +36,7 @@ jobs:
         GENERATE_SITEMAP_TXT: "false"
         GENERATE_API_TXT: "false"
     - name: Test encrypted MongoDB storage
-      run: |
-        cd /tmp/project 
-        mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
-        cd $HERE
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
       env:
         NODE_ENV: "testing"
         FAST_START: "true"
@@ -62,7 +51,6 @@ jobs:
         ENCRYPTION_SECRET_IV: "1234123412341234"
     - name: Increase NPM version
       run: |
-        cd $HERE
         git config --global user.name "${{ secrets.NAME }}"
         git config --global user.email "${{ secrets.EMAIL }}"
         npm version patch
