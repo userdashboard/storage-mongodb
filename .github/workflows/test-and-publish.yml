@@ -51,16 +51,9 @@ jobs:
         ENCRYPTION_SECRET_IV: "1234123412341234"
     - name: Publish new version to Github
       run: |
-        pwd
-        ls
-        git config --global user.name "${{ secrets.NAME }}"
-        git config --global user.email "${{ secrets.EMAIL }}"
-        git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
-        echo increasing npm version
-        echo `cat package.json`
+        git clone "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" /tmp/publish
+        cd /tmp/publish
         npm version patch
-        echo npm version has increased
-        echo `cat package.json`
         git add package.json
         git commit -m "Automatically regenerated against current version"
         git push github master --no-verify --signoff
