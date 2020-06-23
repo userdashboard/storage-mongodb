@@ -58,10 +58,10 @@ jobs:
       uses: JS-DevTools/npm-publish@v1
       with:
         token: ${{ secrets.NPM_TOKEN }}
-    - name: Publish to Github
-      uses: stefanzweifel/git-auto-commit-action@v4.1.6
-      with:
-        commit_message: Automatically regenerated against current version
-        branch: ${{ github.head_ref }}
-        commit_options: '--no-verify --signoff'
-        repository: .
+    - name: Publish changes to Github
+      run: |
+        git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
+        git pull github ${GITHUB_REF} --ff-only
+        git add package.json
+        git commit -m "Automatically regenerated against current version"
+        git push github HEAD:${GITHUB_REF}
