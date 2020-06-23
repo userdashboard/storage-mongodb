@@ -13,24 +13,40 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Install MongoDB
-      run: sudo apt-get install -y mongodb
-    - name: Set up as module
+    - name: Install dependencies
       run: |
+        sudo apt-get install -y mongodb
+        npm install mocha faker puppeteer@2.1.1 @userdashboard/dashboard --no-save
         git config --global user.name "${{ secrets.NAME }}"
         git config --global user.email "${{ secrets.EMAIL }}"
-        npm version patch
-        npm install faker puppeteer@2.1.1 @userdashboard/dashboard --no-save
-        npm install -g mocha
+        npm install -g mocha standard
         mkdir -p node_modules/@userdashboard/storage-mongodb
         rm -rf node_modules/@userdashboard/storage-mongodb/src
         cp *.js node_modules/@userdashboard/storage-mongodb
         cp -R src/ node_modules/@userdashboard/storage-mongodb/src/
+    - name: Lint (standard.js)
+      run: standard src
+    - name: Increase NPM version
+      run: npm version patch
+    - name: Test
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
+      env:
+        NODE_ENV: testing
+        FAST_START: true
+        DASHBOARD_SERVER: "http://localhost:9000"
+        DOMAIN: "localhost"
+        STORAGE: "@userdashboard/storage-mongodb"
+        MONGODB_URL: "mongodb://localhost:27017"
+        GENERATE_SITEMAP_TXT: false
+        GENERATE_API_TXT: false
+    - name: Publish to Github
+      uses: stefanzweifel/git-auto-commit-action@v4.1.6
+      with:
+        commit_message: Automatically regenerated against current version
+        branch: ${{ github.head_ref }}
+        commit_options: '--no-verify --signoff'
+        repository: .
     - name: Publish to NPM
       uses: JS-DevTools/npm-publish@v1
       with:
-        token: ${{ secrets.NPM_TOKEN }}
-    - name: Publish to Github
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: Published new version
+        token: ${{ secrets.NPM_TOKEN }} 
