@@ -43,7 +43,7 @@ jobs:
         GENERATE_SITEMAP_TXT: false
         GENERATE_API_TXT: false
     - name: Test as primary storage
-      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
       env:
         NODE_ENV: testing
         FAST_START: true
@@ -56,7 +56,7 @@ jobs:
         GENERATE_SITEMAP_TXT: false
         GENERATE_API_TXT: false
     - name: Test as module storage
-      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
       env:
         NODE_ENV: testing
         FAST_START: true
@@ -66,6 +66,19 @@ jobs:
         REDIS_URL: "mongodb://localhost:6379"
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017"
+        GENERATE_SITEMAP_TXT: false
+        GENERATE_API_TXT: false
+    - name: Test as primary and separately as module storage
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
+      env:
+        NODE_ENV: testing
+        FAST_START: true
+        DASHBOARD_SERVER: "http://localhost:9000"
+        DOMAIN: "localhost"
+        STORAGE: "@userdashboard/storage-mongodb"
+        MONGODB_URL: "mongodb://localhost:27017/database1"
+        ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
+        ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017/database2"
         GENERATE_SITEMAP_TXT: false
         GENERATE_API_TXT: false
     - name: Publish to Github
