@@ -16,6 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -y mongodb
+        npm install
         npm install faker puppeteer@2.1.1 @userdashboard/dashboard --no-save
         git config --global user.name "${{ secrets.NAME }}"
         git config --global user.email "${{ secrets.EMAIL }}"
