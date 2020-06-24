@@ -56,6 +56,7 @@ jobs:
         ORGANIZATIONS_REDIS_URL: "redis://localhost:6379"
         GENERATE_SITEMAP_TXT: false
         GENERATE_API_TXT: false
+        LOG_LEVEL: "info,debug,error,log"
     - name: Test as module storage
       run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
       env:
