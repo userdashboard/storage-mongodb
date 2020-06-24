@@ -27,7 +27,7 @@ jobs:
         cp -R src/ node_modules/@userdashboard/storage-mongodb/src/
         cp package.json package.json.old
         PACKAGE=`cat package.json`
-        PACKAGE=${PACKAGE/\"deprecated\"\: false,/\"dashboard\": \{ \"modules\"\: \[\"@userdashboard/organizations\"\] \}}
+        PACKAGE=${PACKAGE/\"deprecated\"\: false/\"dashboard\": \{ \"modules\"\: \[\"@userdashboard/organizations\"\] \}}
         echo $PACKAGE > package.json
     - name: Lint (standard.js)
       run: standard src
