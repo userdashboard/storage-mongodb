@@ -16,11 +16,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -y mongodb
+        git config --global user.name "${{ secrets.NAME }}"
+        git config --global user.email "${{ secrets.EMAIL }}"
         npm version patch
         npm install
         npm install faker puppeteer@2.1.1 @userdashboard/dashboard --no-save
-        git config --global user.name "${{ secrets.NAME }}"
-        git config --global user.email "${{ secrets.EMAIL }}"
         npm install -g mocha standard
         mkdir -p node_modules/@userdashboard/storage-mongodb
         rm -rf node_modules/@userdashboard/storage-mongodb/src
