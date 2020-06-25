@@ -43,7 +43,7 @@ jobs:
         GENERATE_SITEMAP_TXT: false
         GENERATE_API_TXT: false
         LOG_LEVEL: "info,debug,error,log"
-    - name: Test as primary storage
+    - name: Test as only storage
       run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js"
       env:
         NODE_ENV: testing
