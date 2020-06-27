@@ -32,7 +32,7 @@ jobs:
     - name: Lint (standard.js)
       run: standard src
     - name: Test as shared storage
-      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
+      run: mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt ; test ${PIPESTATUS[0]} -eq 0
       env:
         NODE_ENV: testing
         FAST_START: true
