@@ -250,31 +250,43 @@ module.exports = {
       if (indexedCollections.objects) {
         return callback(null, indexedCollections.objects)
       }
-      return db.createCollection('objects', (error, collection) => {
+      return db.listCollections((error, collections) => {
         if (error) {
           Log.error('error creating collection', error)
           return callback(new Error('unknown-error'))
         }
-        indexedCollections.objects = collection
-        return collection.indexes((error, indexes) => {
-          if (error) {
-            Log.error('error retrieving indexes', error)
-            return callback(new Error('unknown-error'))
-          }
-          if (indexes && indexes.length) {
+        for (const collection of collections) {
+          if (collection.name === 'objects') {
+            indexedCollections.objects = collection
             return callback(null, collection)
           }
-          return collection.createIndex({ path: 1 }, { collation: { backwards: true, locale: 'en' } }, (error) => {
+        }
+        return db.createCollection('objects', (error, collection) => {
+          if (error) {
+            Log.error('error creating collection', error)
+            return callback(new Error('unknown-error'))
+          }
+          indexedCollections.objects = collection
+          return collection.indexes((error, indexes) => {
             if (error) {
-              Log.error('error creating index1', error)
+              Log.error('error retrieving indexes', error)
               return callback(new Error('unknown-error'))
             }
-            return collection.createIndex({ created: -1 }, { collation: { backwards: true, locale: 'en' } }, (error) => {
+            if (indexes && indexes.length) {
+              return callback(null, collection)
+            }
+            return collection.createIndex({ path: 1 }, { collation: { backwards: true, locale: 'en' } }, (error) => {
               if (error) {
-                Log.error('error retrieving index2', error)
+                Log.error('error creating index1', error)
                 return callback(new Error('unknown-error'))
               }
-              return callback(null, collection)
+              return collection.createIndex({ created: -1 }, { collation: { backwards: true, locale: 'en' } }, (error) => {
+                if (error) {
+                  Log.error('error retrieving index2', error)
+                  return callback(new Error('unknown-error'))
+                }
+                return callback(null, collection)
+              })
             })
           })
         })
