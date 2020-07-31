@@ -178,7 +178,7 @@ module.exports = {
         return callback(null, indexedCollections.lists)
       }
       return db.createCollection('lists', (error, collection) => {
-        if (error) {
+        if (error && error.toString().indexOf('exists') === -1) {
           Log.error('error creating collection', error)
           return callback(new Error('unknown-error'))
         }
