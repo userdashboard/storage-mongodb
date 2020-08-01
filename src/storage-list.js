@@ -179,13 +179,16 @@ module.exports = {
       }
       return db.listCollections((error, collections) => {
         if (error) {
-          Log.error('error creating collection', error)
+          Log.error('error listing collections', error)
           return callback(new Error('unknown-error'))
         }
-        for (const collection of collections) {
-          if (collection.name === 'lists') {
-            indexedCollections.lists = collection
-            return callback(null, collection)
+        Log.info(collections)
+        if (collections && collections.length) {
+          for (const collection of collections) {
+            if (collection.name === 'lists') {
+              indexedCollections.lists = collection
+              return callback(null, collection)
+            }
           }
         }
         return db.createCollection('lists', (error, collection) => {
