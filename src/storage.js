@@ -18,23 +18,23 @@ module.exports = {
       const dashboardPath2 = path.join(global.applicationPath, 'src/log.js')
       Log = require(dashboardPath2)('postgresql-list')
     }
-    const indexedCollections = {}
     let db
-    return MongoDB.MongoClient.connect(mongodbURL, (error, mongoClient) => {
+    return MongoDB.MongoClient.connect(mongodbURL, { useUnifiedTopology: true }, (error, mongoClient) => {
       if (error) {
         return callback(error)
       }
       const client = module.exports.client = mongoClient
       const database = process.env[`${moduleName}_MONGODB_DATABASE`] || process.env.MONGODB_DATABASE || 'dashboard'
       db = client.db(database)
-      const container = {
-        exists: util.promisify((file, callback) => {
-          if (!file) {
-            return callback(new Error('invalid-file'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+      console.log('getting collection')
+      return getCollection((error, collection) => {
+        if (error) {
+          return callback(error)
+        }
+        const container = {
+          exists: util.promisify((file, callback) => {
+            if (!file) {
+              return callback(new Error('invalid-file'))
             }
             return collection.find({ file }, { _id: 1, limit: 1 }, (error, cursor) => {
               if (error) {
@@ -49,15 +49,10 @@ module.exports = {
                 return callback(null, result.length === 1)
               })
             })
-          })
-        }),
-        read: util.promisify((file, callback) => {
-          if (!file) {
-            return callback(new Error('invalid-file'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+          }),
+          read: util.promisify((file, callback) => {
+            if (!file) {
+              return callback(new Error('invalid-file'))
             }
             return collection.findOne({ file }, { contents: 1 }, (error, result) => {
               if (error) {
@@ -66,19 +61,14 @@ module.exports = {
               }
               return callback(null, result.contents)
             })
-          })
-        }),
-        readMany: util.promisify((prefix, files, callback) => {
-          if (!files || !files.length) {
-            return callback(new Error('invalid-files'))
-          }
-          const appended = []
-          for (const i in files) {
-            appended[i] = `${prefix}/${files[i]}`
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+          }),
+          readMany: util.promisify((prefix, files, callback) => {
+            if (!files || !files.length) {
+              return callback(new Error('invalid-files'))
+            }
+            const appended = []
+            for (const i in files) {
+              appended[i] = `${prefix}/${files[i]}`
             }
             const data = {}
             return collection.find({ file: { $in: appended } }, (error, cursor) => {
@@ -110,15 +100,10 @@ module.exports = {
                 return callback(null, data)
               })
             })
-          })
-        }),
-        readBinary: util.promisify((file, callback) => {
-          if (!file) {
-            return callback(new Error('invalid-file'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+          }),
+          readBinary: util.promisify((file, callback) => {
+            if (!file) {
+              return callback(new Error('invalid-file'))
             }
             return collection.findOne({ file }, { buffer: 1 }, (error, result) => {
               if (error) {
@@ -127,18 +112,13 @@ module.exports = {
               }
               return callback(null, result.buffer)
             })
-          })
-        }),
-        write: util.promisify((file, contents, callback) => {
-          if (!file) {
-            return callback(new Error('invalid-file'))
-          }
-          if (!contents && contents !== '') {
-            return callback(new Error('invalid-contents'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+          }),
+          write: util.promisify((file, contents, callback) => {
+            if (!file) {
+              return callback(new Error('invalid-file'))
+            }
+            if (!contents && contents !== '') {
+              return callback(new Error('invalid-contents'))
             }
             return collection.find({ file }, { _id: 1, limit: 1 }, (error, cursor) => {
               if (error) {
@@ -169,18 +149,13 @@ module.exports = {
                 })
               })
             })
-          })
-        }),
-        writeBinary: util.promisify((file, buffer, callback) => {
-          if (!file) {
-            return callback(new Error('invalid-file'))
-          }
-          if (!buffer || !buffer.length) {
-            return callback(new Error('invalid-buffer'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+          }),
+          writeBinary: util.promisify((file, buffer, callback) => {
+            if (!file) {
+              return callback(new Error('invalid-file'))
+            }
+            if (!buffer || !buffer.length) {
+              return callback(new Error('invalid-buffer'))
             }
             return collection.insertOne({ file, buffer, created: new Date().getTime() }, { writeConcern: 1 }, (error) => {
               if (error) {
@@ -189,15 +164,10 @@ module.exports = {
               }
               return callback()
             })
-          })
-        }),
-        delete: util.promisify((file, callback) => {
-          if (!file) {
-            return callback(new Error('invalid-file'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+          }),
+          delete: util.promisify((file, callback) => {
+            if (!file) {
+              return callback(new Error('invalid-file'))
             }
             return collection.deleteOne({ file }, (error) => {
               if (error) {
@@ -207,58 +177,37 @@ module.exports = {
               return callback()
             })
           })
-        })
-      }
-      if (process.env.NODE_ENV === 'testing') {
-        const util = require('util')
-        container.flush = util.promisify((callback) => {
-          function doFlush () {
-            if (!db) {
-              return setTimeout(doFlush, 1)
+        }
+        if (process.env.NODE_ENV === 'testing') {
+          const util = require('util')
+          container.flush = util.promisify((callback) => {
+            if (!collection) {
+              return
             }
-            return db.collections((error, collections) => {
+            return collection.deleteMany({}, (error) => {
               if (error) {
                 Log.error('error flushing', error)
                 return callback(new Error('unknown-error'))
               }
-              function nextItem () {
-                if (!collections.length) {
-                  return callback()
-                }
-                const collection = collections.shift()
-                return collection.deleteMany({}, (error) => {
-                  if (error) {
-                    Log.error('error flushing', error)
-                    return callback(new Error('unknown-error'))
-                  }
-                  return nextItem()
-                })
-              }
-              return nextItem()
+              return callback()
             })
-          }
-          if (!db) {
-            return setTimeout(doFlush, 1)
-          }
-          return doFlush()
-        })
-      }
-      return callback(null, container)
+          })
+        }
+        return callback(null, container)
+      })
     })
 
-    function getCollection (callback) {
-      if (indexedCollections.objects) {
-        return callback(null, indexedCollections.objects)
-      }
-      return db.listCollections((error, collections) => {
+    async function getCollection (callback) {
+      return db.listCollections().toArray((error, collections) => {
         if (error) {
           Log.error('error creating collection', error)
           return callback(new Error('unknown-error'))
         }
-        for (const collection of collections) {
-          if (collection.name === 'objects') {
-            indexedCollections.objects = collection
-            return callback(null, collection)
+        if (collections && collections.length) {
+          for (const collection of collections) {
+            if (collection.name === 'objects') {
+              return db.collection('objects', callback)
+            }
           }
         }
         return db.createCollection('objects', (error, collection) => {
@@ -266,7 +215,6 @@ module.exports = {
             Log.error('error creating collection', error)
             return callback(new Error('unknown-error'))
           }
-          indexedCollections.objects = collection
           return collection.indexes((error, indexes) => {
             if (error) {
               Log.error('error retrieving indexes', error)

@@ -18,21 +18,20 @@ module.exports = {
       const dashboardPath2 = path.join(global.applicationPath, 'src/log.js')
       Log = require(dashboardPath2)('postgresql-list')
     }
-    const indexedCollections = {}
     let db
-    return MongoDB.MongoClient.connect(mongodbURL, (error, mongoClient) => {
+    return MongoDB.MongoClient.connect(mongodbURL, { useUnifiedTopology: true }, (error, mongoClient) => {
       if (error) {
         Log.error('error connecting', error)
         return callback(new Error('unknown-error'))
       }
       const client = module.exports.client = mongoClient
       db = client.db(process.env.MONGODB_DATABASE || 'dashboard')
-      const container = {
-        add: util.promisify((path, itemid, callback) => {
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
-            }
+      return getCollection((error, collection) => {
+        if (error) {
+          return callback(error)
+        }
+        const container = {
+          add: util.promisify((path, itemid, callback) => {
             return collection.insertOne({ path, itemid, created: new Date().getTime() }, { writeConcern: 1 }, (error) => {
               if (error) {
                 Log.error('error adding', error)
@@ -40,13 +39,8 @@ module.exports = {
               }
               return callback()
             })
-          })
-        }),
-        addMany: util.promisify((items, callback) => {
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
-            }
+          }),
+          addMany: util.promisify((items, callback) => {
             const objects = []
             const created = new Date().getTime()
             for (const key in items) {
@@ -59,13 +53,8 @@ module.exports = {
               }
               return callback()
             })
-          })
-        }),
-        count: util.promisify((path, callback) => {
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
-            }
+          }),
+          count: util.promisify((path, callback) => {
             return collection.countDocuments({ path }, (error, count) => {
               if (error) {
                 Log.error('error adding', error)
@@ -73,13 +62,8 @@ module.exports = {
               }
               return callback(null, count)
             })
-          })
-        }),
-        exists: util.promisify((path, itemid, callback) => {
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
-            }
+          }),
+          exists: util.promisify((path, itemid, callback) => {
             return collection.find({ path, itemid }, { _id: 1 }).toArray((error, result) => {
               if (error) {
                 Log.error('error checking exists', error)
@@ -87,28 +71,23 @@ module.exports = {
               }
               return callback(null, result.length === 1)
             })
-          })
-        }),
-        list: util.promisify((path, offset, pageSize, callback) => {
-          if (!callback) {
-            if (pageSize) {
-              callback = pageSize
-              pageSize = null
-            } else if (offset) {
-              callback = offset
-              offset = null
+          }),
+          list: util.promisify((path, offset, pageSize, callback) => {
+            if (!callback) {
+              if (pageSize) {
+                callback = pageSize
+                pageSize = null
+              } else if (offset) {
+                callback = offset
+                offset = null
+              }
             }
-          }
-          offset = offset || 0
-          if (pageSize === null || pageSize === undefined) {
-            pageSize = global.pageSize
-          }
-          if (offset < 0) {
-            return callback(new Error('invalid-offset'))
-          }
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
+            offset = offset || 0
+            if (pageSize === null || pageSize === undefined) {
+              pageSize = global.pageSize
+            }
+            if (offset < 0) {
+              return callback(new Error('invalid-offset'))
             }
             return collection.find({ path }).sort({ created: -1 }).skip(offset).limit(pageSize).toArray((error, results) => {
               if (error) {
@@ -124,13 +103,8 @@ module.exports = {
               }
               return callback(null, items)
             })
-          })
-        }),
-        listAll: util.promisify((path, callback) => {
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
-            }
+          }),
+          listAll: util.promisify((path, callback) => {
             return collection.find({ path }).sort({ created: -1 }).toArray((error, results) => {
               if (error) {
                 Log.error('error listing all', error)
@@ -145,13 +119,8 @@ module.exports = {
               }
               return callback(null, items)
             })
-          })
-        }),
-        remove: util.promisify((path, itemid, callback) => {
-          return getCollection((error, collection) => {
-            if (error) {
-              return callback(error)
-            }
+          }),
+          remove: util.promisify((path, itemid, callback) => {
             return collection.deleteOne({ path, itemid }, (error) => {
               if (error) {
                 Log.error('error deleting', error)
@@ -160,34 +129,35 @@ module.exports = {
               return callback()
             })
           })
-        })
-      }
-      if (process.env.NODE_ENV === 'testing') {
-        container.flush = util.promisify((callback) => {
-          for (const key in indexedCollections) {
-            delete (indexedCollections[key])
-          }
-          return callback()
-        })
-      }
-      return callback(null, container)
+        }
+        if (process.env.NODE_ENV === 'testing') {
+          container.flush = util.promisify((callback) => {
+            if (!collection) {
+              return
+            }
+            return collection.deleteMany({}, (error) => {
+              if (error) {
+                Log.error('error flushing', error)
+                return callback(new Error('unknown-error'))
+              }
+              return callback()
+            })
+          })
+        }
+        return callback(null, container)
+      })
     })
 
     function getCollection (callback) {
-      if (indexedCollections.lists) {
-        return callback(null, indexedCollections.lists)
-      }
-      return db.listCollections((error, collections) => {
+      return db.listCollections().toArray((error, collections) => {
         if (error) {
-          Log.error('error listing collections', error)
+          Log.error('error creating collection', error)
           return callback(new Error('unknown-error'))
         }
-        Log.info(collections)
         if (collections && collections.length) {
           for (const collection of collections) {
             if (collection.name === 'lists') {
-              indexedCollections.lists = collection
-              return callback(null, collection)
+              return db.collection('lists', callback)
             }
           }
         }
@@ -196,7 +166,6 @@ module.exports = {
             Log.error('error creating collection', error)
             return callback(new Error('unknown-error'))
           }
-          indexedCollections.lists = collection
           return collection.indexes((error, indexes) => {
             if (error) {
               Log.error('error retrieving indexes', error)
