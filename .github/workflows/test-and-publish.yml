@@ -7,106 +7,120 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [14.15.1]
+        mongodb-version: [4.4]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Install dependencies
+    - uses: supercharge/mongodb-github-action@1.3.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+    - uses: zhulik/redis-action@1.1.0
+      with:
+        redis version: '5'
+        number of databases: 1
+    - name: Optionally install Chromium via APT instead of puppeteer
       run: |
-        sudo apt-get install -y mongodb redis-server
-        git config --global user.name "${{ secrets.NAME }}"
-        git config --global user.email "${{ secrets.EMAIL }}"
+        if [ ! -z "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
+          APT_INSTALL="chromium gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget"
+          if [ ! -z "$APT_PROXY" ]; then
+            echo "deb $APT_PROXY buster main" > /etc/apt/sources.list
+          fi
+          apt-get update
+          apt-get install -y $APT_INSTALL
+        fi
+    - name: Configure git and increase version
+      run: |
+        if [ ! -z "$INSTALL_GIT" ]; then
+          if [ ! -z "$APT_PROXY" ]; then
+            echo "deb $APT_PROXY buster main" > /etc/apt/sources.list
+          fi
+          if [ -z "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
+            apt-get update
+          fi
+          apt-get install -y git
+        fi
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         npm version patch
-        npm install
-        npm install faker puppeteer@2.1.1 @userdashboard/dashboard @userdashboard/organizations @userdashboard/storage-redis --no-save
-        npm install -g mocha standard
-        mkdir -p node_modules/@userdashboard/storage-mongodb
-        cp *.js node_modules/@userdashboard/storage-mongodb
-        cp -R src/ node_modules/@userdashboard/storage-mongodb/src/
-        cp package.json package.json.old
+    - name: Set up project
+      run: |
+        HERE=`pwd`
+        mkdir /tmp/project
+        cd /tmp/project
+        npm init -y
+        npm install "$HERE" @userdashboard/dashboard @userdashboard/organizations @userdashboard/storage-redis faker puppeteer mocha
         PACKAGE=`cat package.json`
         PACKAGE=${PACKAGE/\"deprecated\"\: false/\"dashboard\": \{ \"modules\"\: \[\"@userdashboard/organizations\"\] \}}
         echo $PACKAGE > package.json
-    - name: Lint (standard.js)
-      run: standard src
-    - name: Test as shared storage
+        echo "global.applicationPath = __dirname" > main.js
+    - name: Lint with standard.js
       run: |
-        mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee ests.txt
+        if [ ! -z "$NPM_PROXY" ]; then
+          npm --registry=$NPM_PROXY install standard -g
+        else
+          npm install standard -g
+        fi        
+        standard
+    - name: Test Dashboard with MongoDB common storage
+      run: |
+        ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee ests.txt
         TESTS=`cat tests.txt`
         if [[ "$TESTS" == *" 1)"* ]]; then
           exit 1
         fi
+      working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        FAST_START: true
-        DASHBOARD_SERVER: "http://localhost:9000"
-        DOMAIN: "localhost"
         STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: "mongodb://localhost:27017"
-        GENERATE_SITEMAP_TXT: false
-        GENERATE_API_TXT: false
-        LOG_LEVEL: "info,debug,error,log"
-    - name: Test as only storage
+    - name: Test Dashboard with MongoDB, module with other storage
       run: |
-        mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
+        ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
         TESTS=`cat tests.txt`
         if [[ "$TESTS" == *" 1)"* ]]; then
           exit 1
         fi
+      working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        FAST_START: true
-        DASHBOARD_SERVER: "http://localhost:9000"
-        DOMAIN: "localhost"
         STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: "mongodb://localhost:27017"
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-redis"
         ORGANIZATIONS_REDIS_URL: "redis://localhost:6379"
-        GENERATE_SITEMAP_TXT: false
-        GENERATE_API_TXT: false
-        LOG_LEVEL: "info,debug,error,log"
-    - name: Test as module storage
+        NODE_OPTIONS: "--preserve-symlinks"
+    - name: Test Dashboard with other storage, module with MongoDB
       run: |
-        mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
+        ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
         TESTS=`cat tests.txt`
         if [[ "$TESTS" == *" 1)"* ]]; then
           exit 1
         fi
+      working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        FAST_START: true
-        DASHBOARD_SERVER: "http://localhost:9000"
-        DOMAIN: "localhost"
         STORAGE: "@userdashboard/storage-redis"
         REDIS_URL: "redis://localhost:6379"
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017"
-        GENERATE_SITEMAP_TXT: false
-        GENERATE_API_TXT: false
-    - name: Test as primary and separately as module storage
+        NODE_OPTIONS: "--preserve-symlinks"
+    - name: Test Dashboard with MongoDB, module with other MongoDB
       run: |
-        mocha --file test-helper.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
+        ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
         TESTS=`cat tests.txt`
         if [[ "$TESTS" == *" 1)"* ]]; then
           exit 1
         fi
+      working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        FAST_START: true
-        DASHBOARD_SERVER: "http://localhost:9000"
-        DOMAIN: "localhost"
         STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: "mongodb://localhost:27017/database1"
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017/database2"
-        GENERATE_SITEMAP_TXT: false
-        GENERATE_API_TXT: false
-    - name: Clean up
-      run: |
-        rm package.json
-        mv package.json.old package.json
+        NODE_OPTIONS: "--preserve-symlinks"
     - name: Publish to Github
       uses: stefanzweifel/git-auto-commit-action@v4.1.6
       with:
