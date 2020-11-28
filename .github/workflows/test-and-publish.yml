@@ -64,7 +64,7 @@ jobs:
           npm install standard -g
         fi        
         standard
-    - name: Test Dashboard with MongoDB common storage
+    - name: Test as only storage for Dashboard and modules
       run: |
         ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee ests.txt
         TESTS=`cat tests.txt`
@@ -76,7 +76,7 @@ jobs:
         NODE_ENV: testing
         STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: "mongodb://localhost:27017"
-    - name: Test Dashboard with MongoDB, module with other storage
+    - name: Test as Dashboard storage with module on other type
       run: |
         ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
         TESTS=`cat tests.txt`
@@ -91,7 +91,7 @@ jobs:
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-redis"
         ORGANIZATIONS_REDIS_URL: "redis://localhost:6379"
         NODE_OPTIONS: "--preserve-symlinks"
-    - name: Test Dashboard with other storage, module with MongoDB
+    - name: Test as module storage with Dashboard on other type
       run: |
         ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
         TESTS=`cat tests.txt`
@@ -106,7 +106,7 @@ jobs:
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017"
         NODE_OPTIONS: "--preserve-symlinks"
-    - name: Test Dashboard with MongoDB, module with other MongoDB
+    - name: Test as Dashboard and module storage using separate servers
       run: |
         ./node_modules/.bin/mocha --file main.js --bail --exit --full-trace --recursive --timeout 90000000 "./node_modules/@userdashboard/**/{,!(public)}/*.test.js" | tee tests.txt
         TESTS=`cat tests.txt`
