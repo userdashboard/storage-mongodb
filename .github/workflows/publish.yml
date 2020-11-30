@@ -74,7 +74,7 @@ jobs:
       working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        STORAGE: @userdashboard/storage-mongodb
+        STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: mongodb://localhost:27017
         NODE_OPTIONS: --preserve-symlinks
     - name: Test as Dashboard storage with module on other type
@@ -87,9 +87,9 @@ jobs:
       working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        STORAGE: @userdashboard/storage-mongodb
+        STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: mongodb://localhost:27017
-        ORGANIZATIONS_STORAGE: @userdashboard/storage-redis
+        ORGANIZATIONS_STORAGE: "@userdashboard/storage-redis"
         ORGANIZATIONS_REDIS_URL: redis://localhost:6379
         NODE_OPTIONS: --preserve-symlinks
     - name: Test as module storage with Dashboard on other type
@@ -102,9 +102,9 @@ jobs:
       working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        STORAGE: @userdashboard/storage-redis
+        STORAGE: "@userdashboard/storage-redis"
         REDIS_URL: redis://localhost:6379
-        ORGANIZATIONS_STORAGE: @userdashboard/storage-mongodb
+        ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: mongodb://localhost:27017
         NODE_OPTIONS: --preserve-symlinks
     - name: Test as Dashboard and module storage using separate servers
@@ -117,9 +117,9 @@ jobs:
       working-directory: /tmp/project
       env:
         NODE_ENV: testing
-        STORAGE: @userdashboard/storage-mongodb
+        STORAGE: "@userdashboard/storage-mongodb"
         MONGODB_URL: "mongodb://localhost:27017/database1"
-        ORGANIZATIONS_STORAGE: @userdashboard/storage-mongodb
+        ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017/database2"
         NODE_OPTIONS: --preserve-symlinks
     - name: Publish to Github
