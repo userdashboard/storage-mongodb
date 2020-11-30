@@ -64,6 +64,7 @@ jobs:
         PACKAGE=${PACKAGE/\"author\"\: \"\"/\"dashboard\": \{ \"modules\"\: \[\"@userdashboard/organizations\"\] \}}
         echo $PACKAGE > package.json
         echo "global.applicationPath = __dirname" > main.js
+        echo "require('@userdashboard/storage-mongodb/test-helper.js')" >> main.js
     - name: Test as only storage for Dashboard and modules
       run: |
         ./node_modules/.bin/mocha --file main.js --bail --exit --recursive --timeout 90000000 $(find ./node_modules/@userdashboard/*/ -name "*.test.js" | grep -i -v [a-z]/node_modules | sort -k5.1,8.1 -t /) | tee ests.txt
