@@ -100,14 +100,3 @@ jobs:
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: "mongodb://localhost:27017/database2"
         NODE_OPTIONS: --preserve-symlinks
-    - name: Publish to Github
-      uses: stefanzweifel/git-auto-commit-action@v4.1.6
-      with:
-        commit_message: Automatically regenerated against current version
-        branch: ${{ github.head_ref }}
-        commit_options: '--no-verify --signoff'
-        repository: .
-    - name: Publish to NPM
-      uses: JS-DevTools/npm-publish@v1
-      with:
-        token: ${{ secrets.NPM_TOKEN }} 
