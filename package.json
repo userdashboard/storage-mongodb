@@ -1,1 +1,30 @@
-{}
+{
+  "dependencies": {
+    "mongodb": "^3.5.7"
+  },
+  "description": "Use MongoDB as storage for Dashboard",
+  "devDependencies": {
+    "@userdashboard/dashboard": "1.x"
+  },
+  "engines": {
+    "node": ">=14.0",
+    "npm": ">=6.0"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "name": "@userdashboard/storage-mongodb",
+  "optionalDependencies": {
+    "@userdashboard/dashboard": "1.x"
+  },
+  "peerDependencies": {
+    "@userdashboard/dashboard": "1.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/userdashboard/storage-mongodb.git"
+  },
+  "scripts": {
+    "test": "act -j test"
+  },
+  "version": "1.0.24"
+}
