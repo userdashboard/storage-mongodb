@@ -70,7 +70,7 @@ jobs:
         ORGANIZATIONS_STORAGE: "@userdashboard/storage-mongodb"
         ORGANIZATIONS_MONGODB_URL: mongodb://localhost:27017
         NODE_OPTIONS: --preserve-symlinks
-    - name: Test as Dashboard and module storage using separate servers
+    - name: Test as Dashboard and module using two instances of storage
       run: ./node_modules/.bin/mocha --file main.js --bail --exit --recursive --timeout 90000000 $(find ./node_modules/@userdashboard/*/ -name "*.test.js" | grep -i -v [a-z]/node_modules | sort -k5.1,8.1 -t /)
       working-directory: /tmp/project
       env:
