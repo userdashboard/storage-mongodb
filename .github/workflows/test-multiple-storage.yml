@@ -1,4 +1,4 @@
-aname: test-multiple-storage
+name: test-multiple-storage
 
 on: [push]
 
