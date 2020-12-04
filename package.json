@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "mongodb": "^3.5.7"
+    "mongodb": "^3.6.3"
   },
   "description": "Use MongoDB as storage for Dashboard",
   "devDependencies": {
