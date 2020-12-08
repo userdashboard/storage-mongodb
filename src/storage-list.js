@@ -1,6 +1,4 @@
-const fs = require('fs')
 const MongoDB = require('mongodb')
-const path = require('path')
 const util = require('util')
 
 module.exports = {
@@ -10,14 +8,7 @@ module.exports = {
       moduleName = null
     }
     const mongodbURL = process.env[`${moduleName}_MONGODB_URL`] || process.env.MONGODB_URL
-    const dashboardPath1 = path.join(global.applicationPath, 'node_modules/@userdashboard/dashboard/src/log.js')
-    let Log
-    if (fs.existsSync(dashboardPath1)) {
-      Log = require(dashboardPath1)('postgresql-list')
-    } else {
-      const dashboardPath2 = path.join(global.applicationPath, 'src/log.js')
-      Log = require(dashboardPath2)('postgresql-list')
-    }
+    const Log = require('@userdashboard/dashboard/src/log.js')('postgresql-list')
     let db
     return MongoDB.MongoClient.connect(mongodbURL, { useUnifiedTopology: true }, (error, mongoClient) => {
       if (error) {
