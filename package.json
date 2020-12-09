@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "mongodb": "^3.6.3"
-  }, 
+  },
   "peerDependencies": {
     "@userdashboard/dashboard": "1.x - latest"
   },
@@ -26,5 +26,5 @@
   "scripts": {
     "test": "act -j test"
   },
-  "version": "1.0.24"
+  "version": "1.0.25"
 }
