@@ -17,7 +17,6 @@ module.exports = {
       const client = module.exports.client = mongoClient
       const database = process.env[`${moduleName}_MONGODB_DATABASE`] || process.env.MONGODB_DATABASE || 'dashboard'
       db = client.db(database)
-      console.log('getting collection')
       return getCollection((error, collection) => {
         if (error) {
           return callback(error)
