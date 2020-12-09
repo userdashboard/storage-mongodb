@@ -5,6 +5,12 @@
   "peerDependencies": {
     "@userdashboard/dashboard": "1.0.0 - 9999.9999.9999"
   },
+  "devDependencies": {
+    "@userdashboard/dashboard": "1.0.0 - 9999.9999.9999"
+  },
+  "optionalDependencies": {
+    "@userdashboard/dashboard": "1.0.0 - 9999.9999.9999"
+  },
   "description": "Use MongoDB as storage for Dashboard",
   "engines": {
     "node": ">=14.0",
